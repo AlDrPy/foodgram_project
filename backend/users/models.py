@@ -51,11 +51,13 @@ class CustomUser(AbstractUser):
     @property
     def is_admin(self):
         return self.is_superuser or self.is_staff
-
+    
+    # @property
+    # def is_subscribed(self):
+    #     return 
 
     class Meta:
         ordering = ('username',)
 
     def __str__(self) -> str:
         return self.username
-
