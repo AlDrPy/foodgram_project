@@ -68,8 +68,8 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '/db_dev_data/db.sqlite3',  # volume для контейнеров
-        #  'NAME': BASE_DIR / 'db.sqlite3',
+        # 'NAME': '/db_dev_data/db.sqlite3',  # volume для контейнеров
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -121,6 +121,14 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = '/media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'users.CustomUser'
+
+
+NAME_MAX_LEN = 50
+EMAIL_MAX_LEN = 254
+PASSWORD_MAX_LEN = 256
+
 
 
 # if __name__ == "__main__":
