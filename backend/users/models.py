@@ -18,7 +18,7 @@ class CustomUser(AbstractUser):
         unique=True,
         blank=False,
         error_messages={
-            'unique': 'Пользователь с таким именем уже существует',
+            'unique': 'Пользователь с таким логином уже существует',
         },
         verbose_name='Логин'
     )
@@ -51,13 +51,30 @@ class CustomUser(AbstractUser):
     @property
     def is_admin(self):
         return self.is_superuser or self.is_staff
-    
-    # @property
-    # def is_subscribed(self):
-    #     return 
 
     class Meta:
         ordering = ('username',)
 
     def __str__(self) -> str:
         return self.username
+
+
+class Subscription(models.Model):
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='subscriptions',
+        verbose_name='Подписчик'
+    )
+    author = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='subscribers',
+        verbose_name='Автор'
+    )
+
+    def __str__(self):
+        return (
+            f'{self.user} подписан '
+            f'на {self.author}'
+        )
