@@ -1,4 +1,4 @@
-from djoser.serializers import UserSerializer
+# from djoser.serializers import UserSerializer
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
@@ -8,14 +8,19 @@ from users.models import Subscription
 User = get_user_model()
 
 
-class CustomUserSerializer(UserSerializer):
-    is_admin = serializers.ReadOnlyField()
+class CustomUserSerializer(serializers.ModelSerializer):
+    is_subscribed = serializers.SerializerMethodField()
+
+    def get_is_subscribed(self, obj):
+        return self.context['request'].user.fav_authors.filter(id=obj.id).exists()
 
     class Meta:
         model = User
         fields = (
-            'email', 'id', 'username', 'first_name', 'last_name', 'is_admin'
+            'email', 'id', 'username', 'first_name', 'last_name', 'is_subscribed'
         )
+
+
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
@@ -30,7 +35,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('author', 'user')
+        fields = ('author', 'user', 'id')
         model = Subscription
         validators = [
             UniqueTogetherValidator(

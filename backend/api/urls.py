@@ -7,8 +7,9 @@ from users.views import CustomUserViewSet, SubscriptionViewSet
 app_name = 'api'
 
 router = DefaultRouter()
-router.register(r'users', CustomUserViewSet)
-router.register(r'users/subscriptions', SubscriptionViewSet)
+# router.register(
+#     r'users/subscriptions', SubscriptionViewSet, basename='subscriptions')
+router.register(r'users', CustomUserViewSet, basename='subscriptions')
 
 # router.register(r'cats', CatViewSet)
 # router.register(r'achievements', AchievementViewSet)
