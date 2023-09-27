@@ -1,10 +1,9 @@
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.contrib.auth import get_user_model
 #from rest_framework.pagination import LimitOffsetPagination
-
 from djoser.views import UserViewSet
 
 from users.models import Subscription
@@ -18,18 +17,6 @@ class CustomUserViewSet(UserViewSet):
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
-
-    # def get_serializer_class(self):
-    #     if self.action == "subscriptions":
-    #         return self.serializer_class
-    #     elif self.action == "subscribe_unsubscribe":
-    #         return SubscriptionSerializer
-    #     else:
-    #         return self.serializer_class
-
-
-    # def perform_create(self, serializer):
-    #     serializer.save(user=self.request.user)
 
     @action(detail=False,
             permission_classes=(permissions.IsAuthenticated, ),
@@ -56,20 +43,14 @@ class CustomUserViewSet(UserViewSet):
                 context={'request': request}
             )
             sub_serializer.is_valid(raise_exception=True)
-            sub_serializer.save(user=self.request.user)
-            return Response(sub_serializer.data, status=status.HTTP_201_CREATED)
-        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-                
-        # if request.method == 'DELETE':
-        #     subscription = get_object_or_404(Subscription, user=current_user, author=author)
-        #     subscription.delete()
-        #     return Response(status=status.HTTP_204_NO_CONTENT)
+            sub_serializer.save(user=request.user)
+            return Response(
+                sub_serializer.data, status=status.HTTP_201_CREATED)
 
-
-# class SubscriptionViewSet(viewsets.ReadOnlyModelViewSet):
-#     serializer_class = CustomUserSerializer
-
-#     def get_queryset(self):
-#         return self.request.user.fav_authors.all()
-
-
+        if request.method == 'DELETE':
+            subscription = get_object_or_404(
+                Subscription,
+                user=request.user,
+                author=author)
+            subscription.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)

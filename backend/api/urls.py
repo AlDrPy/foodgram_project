@@ -9,9 +9,6 @@ router = DefaultRouter()
 # router.register(
 #     r'users/subscriptions', SubscriptionViewSet, basename='subscriptions')
 router.register(r'users', CustomUserViewSet, basename='user')
-router.register(
-    r'users/(?P<user_id>\d+)/subscribe', CustomUserViewSet, basename='subscribe'
-)
 
 urlpatterns = [
     path('', include(router.urls)),
