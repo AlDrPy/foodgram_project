@@ -21,12 +21,10 @@ class CustomUserSerializer(serializers.ModelSerializer):
         )
 
 
-
-
 class SubscriptionSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username',
-        queryset=User.objects.all()
+        queryset=User.objects.all()   # Нужен только, если read_only=False
     )
     user = serializers.SlugRelatedField(
         read_only=True,
@@ -35,7 +33,8 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('author', 'user', 'id')
+        fields = ('author', 'user')
+
         model = Subscription
         validators = [
             UniqueTogetherValidator(
@@ -50,3 +49,6 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         if value.username == user.username:
             raise serializers.ValidationError('Нельзя подписываться на себя!')
         return value
+
+    def to_representation(self, instance):
+        return CustomUserSerializer(instance.author, context=self.context).data
