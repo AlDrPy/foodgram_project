@@ -1,3 +1,12 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404
+from rest_framework import viewsets, permissions, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
-# Create your views here.
+from receipts.models import Tag, Ingredient, Measurement, Receipt
+from api.serializers import TagSerializer
+
+
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
