@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
-from receipts.models import Tag, Ingredient, Measurement, Receipt
-
+from receipts.models import Tag
 
 class TagSerializer(serializers.ModelSerializer):
 
