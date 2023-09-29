@@ -51,7 +51,7 @@ class Receipt(models.Model):
     )
     image = models.ImageField(
         blank=True,
-        upload_to='recipes/',
+        upload_to='recipes/images/',
         verbose_name='Изображение',
     )
     text = models.TextField(blank=False, verbose_name='Описание')
@@ -127,3 +127,28 @@ class Favorite(models.Model):
         return f'{self.receipt.name} в избраннном у {self.user.username}'
 
 
+class Cart(models.Model):
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='carts',
+        verbose_name='Пользователь'
+    )
+    receipt = models.ForeignKey(
+        Receipt,
+        on_delete=models.CASCADE,
+        related_name='carts',
+        verbose_name='Рецепт'
+    )
+
+    class Meta:
+        ordering = ['-id']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'receipt'],
+                name='unique_user_receipt_cart'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.receipt.name} в корзине у {self.user.username}'

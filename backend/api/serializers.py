@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from receipts.models import Tag, Ingredient, Receipt, Favorite
+from receipts.models import Tag, Ingredient, Receipt, Favorite, Cart
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -30,7 +30,7 @@ class ReceiptListSerializer(serializers.ModelSerializer):
             # 'is_favorited',
             # 'is_in_shopping_cart',
             'name',
-            # 'image',
+            'image',
             'text',
             'cooking_time'
         )
@@ -43,7 +43,7 @@ class ReceiptMiniSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'name',
-            # 'image',
+            'image',
             'cooking_time'
         )
 
@@ -52,6 +52,20 @@ class ReceiptFavoriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Favorite
+        fields = (
+            'user',
+            'receipt'
+        )
+
+    def to_representation(self, instance):
+        return ReceiptMiniSerializer(
+            instance.receipt, context=self.context).data
+
+
+class ReceiptCartSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Cart
         fields = (
             'user',
             'receipt'
