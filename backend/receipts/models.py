@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator
 
 from users.models import CustomUser
 
@@ -48,7 +49,11 @@ class Receipt(models.Model):
         max_length=200,
         verbose_name='Название рецепта'
     )
-    # image = models.ImageField(unique=True, blank=False, upload_to=)
+    image = models.ImageField(
+        blank=True,
+        upload_to='recipes/',
+        verbose_name='Изображение',
+    )
     text = models.TextField(blank=False, verbose_name='Описание')
     ingredients = models.ManyToManyField(
         Ingredient,
@@ -62,7 +67,11 @@ class Receipt(models.Model):
         verbose_name='Теги',
         related_name='receipts',
     )
-    cooking_time = models.IntegerField(blank=False)
+    cooking_time = models.IntegerField(
+        blank=False,
+        verbose_name='Время приготовления',
+        validators=[MinValueValidator(1, 'Время готовки не менее 1 минуты')]
+    )
 
     def __str__(self):
         return self.name
@@ -89,3 +98,32 @@ class IngredientInReceipt(models.Model):
             f'{self.ingredient} в количестве '
             f'{self.ingr_amount} {self.ingredient.measurement_unit} '
         )
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='favorites',
+        verbose_name='Пользователь',
+    )
+    receipt = models.ForeignKey(
+        Receipt,
+        on_delete=models.CASCADE,
+        related_name='favorites',
+        verbose_name='Рецепт',
+    )
+
+    class Meta:
+        ordering = ['-id']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'receipt'],
+                name='unique_user_receipt_favorite'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.receipt.name} в избраннном у {self.user.username}'
+
+
