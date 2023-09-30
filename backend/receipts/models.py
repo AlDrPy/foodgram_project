@@ -81,14 +81,16 @@ class IngredientInReceipt(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        verbose_name='Ингредиент'
+        verbose_name='Ингредиент',
+        related_name='ing_in_rcpt'
     )
     receipt = models.ForeignKey(
         Receipt,
         on_delete=models.CASCADE,
-        verbose_name='Рецепт'
+        verbose_name='Рецепт',
+        related_name='ing_in_rcpt'
     )
-    ingr_amount = models.IntegerField(
+    amount = models.IntegerField(
         verbose_name='Количество ингредиента'
     )
 
@@ -96,7 +98,7 @@ class IngredientInReceipt(models.Model):
         return (
             f'Рецепт {self.receipt} содержит '
             f'{self.ingredient} в количестве '
-            f'{self.ingr_amount} {self.ingredient.measurement_unit} '
+            f'{self.amount} {self.ingredient.measurement_unit} '
         )
 
 

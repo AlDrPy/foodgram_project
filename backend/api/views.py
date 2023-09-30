@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from receipts.models import (Tag, Ingredient, Receipt,
                              Favorite, Cart, IngredientInReceipt)
 from api.serializers import (TagSerializer, IngredientSerializer,
-                             ReceiptListSerializer,
+                             ReceiptListSerializer, ReceiptPostPatchSerializer,
                              ReceiptFavoriteSerializer, ReceiptCartSerializer)
 
 
@@ -23,7 +23,11 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 class ReceiptViewSet(viewsets.ModelViewSet):
     queryset = Receipt.objects.all()
-    serializer_class = ReceiptListSerializer
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return ReceiptListSerializer
+        return ReceiptPostPatchSerializer
 
     http_method_names = ['get', 'post', 'head', 'patch', 'delete']
 
@@ -92,7 +96,7 @@ class ReceiptViewSet(viewsets.ModelViewSet):
             receipt__carts__user=request.user
         ).values(
             'ingredient__name', 'ingredient__measurement_unit'
-        ).annotate(ingredient_amount=Sum('ingr_amount'))
+        ).annotate(ingredient_amount=Sum('amount'))
 
         shopping_list = ['Ваши покупки:\n']
         for ingredient in ingredients:
