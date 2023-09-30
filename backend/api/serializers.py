@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from receipts.models import Tag, Ingredient, Receipt, Favorite, Cart
+from users.serializers import CustomUserSerializer
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -19,6 +20,19 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class ReceiptListSerializer(serializers.ModelSerializer):
+    tags = TagSerializer(many=True, read_only=True)
+    author = CustomUserSerializer(read_only=True)
+    ingredients = IngredientSerializer(many=True, read_only=True)
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
+
+    def get_is_favorited(self, obj):
+        return self.context['request'].user.favorites.filter(
+            receipt__id=obj.id).exists()
+
+    def get_is_in_shopping_cart(self, obj):
+        return self.context['request'].user.carts.filter(
+            receipt__id=obj.id).exists()
 
     class Meta:
         model = Receipt
@@ -27,8 +41,8 @@ class ReceiptListSerializer(serializers.ModelSerializer):
             'tags',
             'author',
             'ingredients',
-            # 'is_favorited',
-            # 'is_in_shopping_cart',
+            'is_favorited',
+            'is_in_shopping_cart',
             'name',
             'image',
             'text',
