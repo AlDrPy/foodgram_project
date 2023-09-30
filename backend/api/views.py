@@ -1,40 +1,46 @@
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404, HttpResponse
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from receipts.models import (Tag, Ingredient, Receipt,
                              Favorite, Cart, IngredientInReceipt)
 from api.serializers import (TagSerializer, IngredientSerializer,
                              ReceiptListSerializer, ReceiptPostPatchSerializer,
                              ReceiptFavoriteSerializer, ReceiptCartSerializer)
+from api.permissions import IsAdminOrAuthorOrReadOnly
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    permission_classes = (AllowAny, )
+    pagination_class = None
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    permission_classes = (AllowAny, )
+    pagination_class = None
 
 
 class ReceiptViewSet(viewsets.ModelViewSet):
     queryset = Receipt.objects.all()
+    permission_classes = (IsAdminOrAuthorOrReadOnly, )
+    http_method_names = ['get', 'post', 'head', 'patch', 'delete']
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
             return ReceiptListSerializer
         return ReceiptPostPatchSerializer
 
-    http_method_names = ['get', 'post', 'head', 'patch', 'delete']
-
     @action(methods=['POST', 'DELETE'],
             detail=True,
             url_path=r'favorite',
-            # permission_classes=(permissions.IsAuthenticated, ),
+            permission_classes=(IsAuthenticated, ),
             )
     def like_dislike(self, request, pk):
         receipt = get_object_or_404(Receipt, id=pk)
@@ -62,7 +68,7 @@ class ReceiptViewSet(viewsets.ModelViewSet):
         detail=True,
         methods=['POST', 'DELETE'],
         url_path=r'shopping_cart',
-        # permission_classes=[IsAuthenticated, ]
+        permission_classes=(IsAuthenticated, )
     )
     def add_to_cart_or_remove(self, request, pk):
         receipt = get_object_or_404(Receipt, id=pk)
@@ -88,7 +94,7 @@ class ReceiptViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=False,
-        # permission_classes=[IsAuthenticated, ]
+        permission_classes=(IsAuthenticated, ),
         url_path=r'download_shopping_cart',
     )
     def download_ingredients_from_cart(self, request):

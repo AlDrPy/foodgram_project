@@ -54,12 +54,18 @@ class ReceiptListSerializer(serializers.ModelSerializer):
     image = Base64ImageField(required=False)
 
     def get_is_favorited(self, obj):
-        return self.context['request'].user.favorites.filter(
-            receipt__id=obj.id).exists()
+        request = self.context.get('request')
+        return (request.user.is_authenticated
+                and request.user.favorites.filter(
+                    receipt__id=obj.id
+                ).exists())
 
     def get_is_in_shopping_cart(self, obj):
-        return self.context['request'].user.carts.filter(
-            receipt__id=obj.id).exists()
+        request = self.context.get('request')
+        return (request.user.is_authenticated
+                and request.user.carts.filter(
+                    receipt__id=obj.id
+                ).exists())
 
     class Meta:
         model = Receipt
