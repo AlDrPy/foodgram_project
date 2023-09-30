@@ -98,7 +98,8 @@ REST_FRAMEWORK = {
         # TODO удалить
         'rest_framework.authentication.SessionAuthentication',
     ],
-    
+    'DEFAULT_PAGINATION_CLASS': 'api.pagination.PageLimitPagination',
+    'PAGE_SIZE': 6,
 }
 
 DJOSER = {
@@ -136,8 +137,3 @@ AUTH_USER_MODEL = 'users.CustomUser'
 NAME_MAX_LEN = 50
 EMAIL_MAX_LEN = 254
 PASSWORD_MAX_LEN = 256
-
-
-
-# if __name__ == "__main__":
-#     print(BASE_DIR.parent)
