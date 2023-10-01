@@ -9,7 +9,8 @@ User = get_user_model()
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'email', 'username', 'first_name', 'last_name')
+    list_display = ('pk', 'email', 'username',
+                    'first_name', 'last_name', 'is_admin')
     list_filter = ('username', 'email')
     empty_value_display = EMPTY_VALUE
 

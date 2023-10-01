@@ -1,16 +1,77 @@
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404, HttpResponse
-from rest_framework import viewsets, status
+from django_filters.rest_framework import DjangoFilterBackend
+from django.contrib.auth import get_user_model
+from djoser.views import UserViewSet
+from rest_framework import viewsets, status, permissions, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from receipts.models import (Tag, Ingredient, Receipt,
                              Favorite, Cart, IngredientInReceipt)
-from api.serializers import (TagSerializer, IngredientSerializer,
+from api.serializers import (CustomUserSerializer, SubscriptionSerializer,
+                             FavAuthorsSerializer,
+                             TagSerializer, IngredientSerializer,
                              ReceiptListSerializer, ReceiptPostPatchSerializer,
                              ReceiptFavoriteSerializer, ReceiptCartSerializer)
 from api.permissions import IsAdminOrAuthorOrReadOnly
+from api.filters import IngredientFilter, ReceiptFilter
+from users.models import Subscription
+
+
+User = get_user_model()
+
+
+class CustomUserViewSet(UserViewSet):
+    queryset = User.objects.all()
+    serializer_class = CustomUserSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    @action(detail=False,
+            permission_classes=(permissions.IsAuthenticated, ),
+            )
+    def subscriptions(self, request):
+        favourive_authors = request.user.fav_authors.all()
+        serializer = CustomUserSerializer(
+            favourive_authors,
+            many=True,
+            context={'request': request}
+        )
+        return Response(serializer.data)
+
+    @action(detail=True,
+            methods=['POST', 'DELETE'],
+            permission_classes=(permissions.IsAuthenticated, ),
+            url_path=r'subscribe',
+            )
+    def subscribe_unsubscribe(self, request, id):
+        author = get_object_or_404(User, pk=id)
+        if request.method == 'POST':
+            sub_serializer = SubscriptionSerializer(
+                data={'author': author},
+                context={'request': request}
+            )
+            sub_serializer.is_valid(raise_exception=True)
+            sub_serializer.save(user=request.user)
+            return Response(
+                sub_serializer.data, status=status.HTTP_201_CREATED)
+
+        if request.method == 'DELETE':
+            subscription = get_object_or_404(
+                Subscription,
+                user=request.user,
+                author=author)
+            subscription.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FavAuthorsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    serializer_class = FavAuthorsSerializer
+
+    def get_queryset(self):
+        return User.objects.filter(
+            subscription_of_author__user=self.request.user)
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -25,12 +86,16 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     permission_classes = (AllowAny, )
     pagination_class = None
+    filter_backends = (DjangoFilterBackend, )
+    filterset_class = IngredientFilter
 
 
 class ReceiptViewSet(viewsets.ModelViewSet):
     queryset = Receipt.objects.all()
     permission_classes = (IsAdminOrAuthorOrReadOnly, )
     http_method_names = ['get', 'post', 'head', 'patch', 'delete']
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = ReceiptFilter
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
