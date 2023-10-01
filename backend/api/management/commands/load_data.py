@@ -1,18 +1,16 @@
 import json
-from pathlib import Path
+import os
 
 from django.core.management.base import BaseCommand
 
 from receipts.models import Ingredient
-
-PROJECT_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
 
 
 class Command(BaseCommand):
 
     help = 'Загрузка ингредиентов в базу '
 
-    path = PROJECT_DIR / 'data/ingredients.json'
+    path = os.path.abspath('data/ingredients.json')
 
     def handle(self, *args, **kwargs):
         with open(self.path, 'r', encoding='utf-8') as file:

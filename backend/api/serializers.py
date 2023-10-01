@@ -29,7 +29,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
 class SubscriptionSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username',
-        queryset=User.objects.all()   # Нужен только, если read_only=False
+        queryset=User.objects.all()
     )
     user = serializers.SlugRelatedField(
         read_only=True,
@@ -84,9 +84,6 @@ class FavAuthorsSerializer(CustomUserSerializer):
 
     def get_recipes_count(self, obj):
         return obj.receipts.count()
-
-
-
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -171,19 +168,19 @@ class ReceiptPostPatchSerializer(serializers.ModelSerializer):
         fields = ('ingredients', 'tags', 'image',
                   'name', 'text', 'cooking_time')
 
-    # def validate(self, data):
-    #     ingredients_list = []
-    #     for ingredient in data.get('recipeingredients'):
-    #         if ingredient.get('amount') <= 0:
-    #             raise serializers.ValidationError(
-    #                 'Количество не может быть меньше 1'
-    #             )
-    #         ingredients_list.append(ingredient.get('id'))
-    #     if len(set(ingredients_list)) != len(ingredients_list):
-    #         raise serializers.ValidationError(
-    #             'Нельзя добавить два одинаковых ингредиента в один рецепт'
-    #         )
-    #     return data
+    def validate(self, data):
+        ingredients_list = []
+        for ingredient in data.get('ing_in_rcpt'):
+            if ingredient.get('amount') <= 0:
+                raise serializers.ValidationError(
+                    'Количество не может быть меньше 1'
+                )
+            ingredients_list.append(ingredient.get('id'))
+        if len(set(ingredients_list)) != len(ingredients_list):
+            raise serializers.ValidationError(
+                'Нельзя добавить два одинаковых ингредиента в один рецепт'
+            )
+        return data
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')
