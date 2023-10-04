@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator, MaxValueValidator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
@@ -198,7 +197,7 @@ class ReceiptPostPatchSerializer(serializers.ModelSerializer):
                 'Нельзя добавить два одинаковых ингредиента в один рецепт'
             )
         return data
-    
+
     def add_ingredients(self, ingredients, receipt):
         for ingredient in ingredients:
             amount = ingredient.get('amount')

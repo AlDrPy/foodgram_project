@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from receipts.models import (Tag, Ingredient, Receipt,
-                             Favorite, Cart, IngredientInReceipt)
+                             IngredientInReceipt)
 from api.serializers import (CustomUserSerializer, SubscriptionSerializer,
                              FavAuthorsSerializer,
                              TagSerializer, IngredientSerializer,
