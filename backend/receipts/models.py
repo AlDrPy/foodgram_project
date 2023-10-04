@@ -1,19 +1,22 @@
 from django.db import models
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 from users.models import CustomUser
+from backend.settings import CUSTOM_MIN_VALUE, CUSTOM_MAX_VALUE
 
 
 class Tag(models.Model):
-    name = models.CharField(blank=False, unique=True, max_length=200)
+    name = models.CharField(unique=True, max_length=200)
     color = models.CharField(
-        blank=False,
         null=True,
         unique=True,
         max_length=7,
         default='#ffffff',
     )
-    slug = models.SlugField(blank=False, unique=True, max_length=200)
+    slug = models.SlugField(unique=True, max_length=200)
+
+    class Meta:
+        ordering = ['id']
 
     def __str__(self):
         return self.name
@@ -21,16 +24,17 @@ class Tag(models.Model):
 
 class Ingredient(models.Model):
     name = models.CharField(
-        blank=False,
         unique=True,
         max_length=200,
         verbose_name='Наименование'
     )
     measurement_unit = models.CharField(
-        blank=False,
         max_length=200,
         verbose_name='Ед.измерения'
     )
+
+    class Meta:
+        ordering = ['id']
 
     def __str__(self):
         return self.name
@@ -40,12 +44,10 @@ class Receipt(models.Model):
     author = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        blank=False,
         verbose_name='Автор рецепта',
         related_name='receipts'
     )
     name = models.CharField(
-        blank=False,
         max_length=200,
         verbose_name='Название рецепта'
     )
@@ -54,11 +56,10 @@ class Receipt(models.Model):
         upload_to='recipes/images/',
         verbose_name='Изображение',
     )
-    text = models.TextField(blank=False, verbose_name='Описание')
+    text = models.TextField(verbose_name='Описание')
     ingredients = models.ManyToManyField(
         Ingredient,
         through='IngredientInReceipt',
-        blank=False,
         verbose_name='Ингредиенты',
         related_name='receipts',
     )
@@ -67,11 +68,20 @@ class Receipt(models.Model):
         verbose_name='Теги',
         related_name='receipts',
     )
-    cooking_time = models.IntegerField(
-        blank=False,
+    cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления',
-        validators=[MinValueValidator(1, 'Время готовки не менее 1 минуты')]
+        validators=[
+            MinValueValidator(
+                CUSTOM_MIN_VALUE,
+                f'Время готовки не менее {CUSTOM_MIN_VALUE} мин'),
+            MaxValueValidator(
+                CUSTOM_MAX_VALUE,
+                f'Время готовки не более {CUSTOM_MAX_VALUE} мин')
+        ]
     )
+
+    class Meta:
+        ordering = ['id']
 
     def __str__(self):
         return self.name
@@ -90,9 +100,12 @@ class IngredientInReceipt(models.Model):
         verbose_name='Рецепт',
         related_name='ing_in_rcpt'
     )
-    amount = models.IntegerField(
+    amount = models.PositiveSmallIntegerField(
         verbose_name='Количество ингредиента'
     )
+
+    class Meta:
+        ordering = ['id']
 
     def __str__(self):
         return (
@@ -117,7 +130,7 @@ class Favorite(models.Model):
     )
 
     class Meta:
-        ordering = ['-id']
+        ordering = ['id']
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'receipt'],
@@ -144,7 +157,7 @@ class Cart(models.Model):
     )
 
     class Meta:
-        ordering = ['-id']
+        ordering = ['id']
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'receipt'],

@@ -119,7 +119,7 @@ class ReceiptViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
-            favorite = Favorite.objects.filter(receipt=receipt)
+            favorite = receipt.favorites.all()
             if not favorite.exists():
                 return Response(
                     {'errors': 'В Избранном нет такого рецепта.'},
@@ -147,7 +147,7 @@ class ReceiptViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
-            cart_item = Cart.objects.filter(receipt=receipt)
+            cart_item = receipt.carts.all()
             if not cart_item.exists():
                 return Response(
                     {'errors': 'В Корзине нет такого рецепта.'},
@@ -176,6 +176,7 @@ class ReceiptViewSet(viewsets.ModelViewSet):
             amount = ingredient['ingredient_amount']
             shopping_list.append(f'\n{name} - {amount}, {unit}')
         response = HttpResponse(shopping_list, content_type='text/plain')
-        response['Content-Disposition'] = \
+        response['Content-Disposition'] = (
             'attachment; filename="shopping_cart.txt"'
+        )
         return response

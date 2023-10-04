@@ -20,11 +20,17 @@ class IngredientAdmin(admin.ModelAdmin):
     empty_value_display = EMPTY_VALUE
 
 
+class RecipeIngredientInline(admin.TabularInline):
+    model = IngredientInReceipt
+    min_num = 1
+
+
 class ReceiptAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'author', 'total_in_favorites')
     search_fields = ('name', 'author')
     list_filter = ('name', 'author', 'tags')
     empty_value_display = EMPTY_VALUE
+    inlines = (RecipeIngredientInline, )
 
     def total_in_favorites(self, obj):
         return obj.favorites.count()

@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
@@ -7,6 +8,7 @@ from api.utils import Base64ImageField
 from receipts.models import (Tag, Ingredient, Receipt,
                              Favorite, Cart, IngredientInReceipt)
 from users.models import Subscription
+from backend.settings import CUSTOM_MIN_VALUE, CUSTOM_MAX_VALUE
 
 User = get_user_model()
 
@@ -15,7 +17,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
 
     def get_is_subscribed(self, obj):
-        request = self.context.get('request')
+        request = self.context['request']
         return (request.user.is_authenticated
                 and request.user.fav_authors.filter(id=obj.id).exists())
 
@@ -72,7 +74,7 @@ class FavAuthorsSerializer(CustomUserSerializer):
                             'is_subscribed', 'recipes', 'recipes_count')
 
     def get_recipes(self, obj):
-        request = self.context.get('request')
+        request = self.context['request']
         recipes_limit = None
         if request:
             recipes_limit = request.query_params.get('recipes_limit')
@@ -117,6 +119,15 @@ class IngredientToReceiptSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     amount = serializers.IntegerField()
 
+    def validate_amount(self, value):
+        if value <= CUSTOM_MIN_VALUE:
+            raise serializers.ValidationError(
+                f'Количество должно быть не менее {CUSTOM_MIN_VALUE}')
+        if value >= CUSTOM_MAX_VALUE:
+            raise serializers.ValidationError(
+                f'Количество не должно превышать {CUSTOM_MAX_VALUE}')
+        return value
+
     class Meta:
         model = IngredientInReceipt
         fields = ('id', 'amount')
@@ -132,14 +143,14 @@ class ReceiptListSerializer(serializers.ModelSerializer):
     image = Base64ImageField(required=False)
 
     def get_is_favorited(self, obj):
-        request = self.context.get('request')
+        request = self.context['request']
         return (request.user.is_authenticated
                 and request.user.favorites.filter(
                     receipt__id=obj.id
                 ).exists())
 
     def get_is_in_shopping_cart(self, obj):
-        request = self.context.get('request')
+        request = self.context['request']
         return (request.user.is_authenticated
                 and request.user.carts.filter(
                     receipt__id=obj.id
@@ -162,6 +173,16 @@ class ReceiptPostPatchSerializer(serializers.ModelSerializer):
         many=True,
     )
     image = Base64ImageField()
+    cooking_time = serializers.IntegerField()
+
+    def validate_cooking_time(self, value):
+        if value <= CUSTOM_MIN_VALUE:
+            raise serializers.ValidationError(
+                f'Количество должно быть не менее {CUSTOM_MIN_VALUE}')
+        if value >= CUSTOM_MAX_VALUE:
+            raise serializers.ValidationError(
+                f'Количество не должно превышать {CUSTOM_MAX_VALUE}')
+        return value
 
     class Meta:
         model = Receipt
@@ -171,16 +192,21 @@ class ReceiptPostPatchSerializer(serializers.ModelSerializer):
     def validate(self, data):
         ingredients_list = []
         for ingredient in data.get('ing_in_rcpt'):
-            if ingredient.get('amount') <= 0:
-                raise serializers.ValidationError(
-                    'Количество не может быть меньше 1'
-                )
             ingredients_list.append(ingredient.get('id'))
         if len(set(ingredients_list)) != len(ingredients_list):
             raise serializers.ValidationError(
                 'Нельзя добавить два одинаковых ингредиента в один рецепт'
             )
         return data
+    
+    def add_ingredients(self, ingredients, receipt):
+        for ingredient in ingredients:
+            amount = ingredient.get('amount')
+            current_ingredient = get_object_or_404(
+                Ingredient, id=ingredient.get('id'))
+            IngredientInReceipt.objects.create(
+                ingredient=current_ingredient, receipt=receipt,
+                amount=amount)
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')
@@ -190,13 +216,7 @@ class ReceiptPostPatchSerializer(serializers.ModelSerializer):
             **validated_data
         )
         receipt.tags.set(tags)
-        for ingr in ingredients:
-            amount = ingr.get('amount')
-            current_ingr = get_object_or_404(
-                Ingredient, id=ingr.get('id'))
-            IngredientInReceipt.objects.create(
-                ingredient=current_ingr, receipt=receipt,
-                amount=amount)
+        self.add_ingredients(ingredients, receipt)
         return receipt
 
     def update(self, instance, validated_data):
@@ -206,13 +226,7 @@ class ReceiptPostPatchSerializer(serializers.ModelSerializer):
         instance.tags.set(tags)
         IngredientInReceipt.objects.filter(receipt=instance).delete()
         super().update(instance, validated_data)
-        for ingr in ingredients:
-            amount = ingr.get('amount')
-            current_ingr = get_object_or_404(
-                Ingredient, id=ingr.get('id'))
-            IngredientInReceipt.objects.create(
-                ingredient=current_ingr, receipt=instance,
-                amount=amount)
+        self.add_ingredients(ingredients, instance)
         instance.save()
         return instance
 
