@@ -74,8 +74,8 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        # 'NAME': '/db_dev_data/db.sqlite3',  # volume для контейнеров
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': '/db_dev_data/db.sqlite3',  # volume для контейнеров
+        # 'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 

@@ -119,10 +119,10 @@ class IngredientToReceiptSerializer(serializers.ModelSerializer):
     amount = serializers.IntegerField()
 
     def validate_amount(self, value):
-        if value <= CUSTOM_MIN_VALUE:
+        if value < CUSTOM_MIN_VALUE:
             raise serializers.ValidationError(
                 f'Количество должно быть не менее {CUSTOM_MIN_VALUE}')
-        if value >= CUSTOM_MAX_VALUE:
+        if value > CUSTOM_MAX_VALUE:
             raise serializers.ValidationError(
                 f'Количество не должно превышать {CUSTOM_MAX_VALUE}')
         return value
