@@ -1,9 +1,8 @@
 from django.contrib import admin
 
 from backend.settings import EMPTY_VALUE
-from receipts.models import (Tag, Ingredient,
-                             Receipt, IngredientInReceipt,
-                             Favorite, Cart)
+from receipts.models import (Cart, Favorite, Ingredient, IngredientInReceipt,
+                             Receipt, Tag)
 
 
 class TagAdmin(admin.ModelAdmin):

@@ -4,10 +4,10 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 from api.utils import Base64ImageField
-from receipts.models import (Tag, Ingredient, Receipt,
-                             Favorite, Cart, IngredientInReceipt)
+from backend.settings import CUSTOM_MAX_VALUE, CUSTOM_MIN_VALUE
+from receipts.models import (Cart, Favorite, Ingredient, IngredientInReceipt,
+                             Receipt, Tag)
 from users.models import Subscription
-from backend.settings import CUSTOM_MIN_VALUE, CUSTOM_MAX_VALUE
 
 User = get_user_model()
 

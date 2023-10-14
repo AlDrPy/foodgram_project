@@ -1,12 +1,7 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db import models
 
-
-from backend.settings import (
-    EMAIL_MAX_LEN,
-    NAME_MAX_LEN,
-    PASSWORD_MAX_LEN
-)
+from backend.settings import EMAIL_MAX_LEN, NAME_MAX_LEN, PASSWORD_MAX_LEN
 
 
 class CustomUser(AbstractUser):

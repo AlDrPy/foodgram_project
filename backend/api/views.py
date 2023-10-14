@@ -1,24 +1,22 @@
-from django.db.models import Sum
-from django.shortcuts import get_object_or_404, HttpResponse
-from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.auth import get_user_model
+from django.db.models import Sum
+from django.shortcuts import HttpResponse, get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from rest_framework import viewsets, status, permissions, mixins
+from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
 
-from receipts.models import (Tag, Ingredient, Receipt,
-                             IngredientInReceipt)
-from api.serializers import (CustomUserSerializer, SubscriptionSerializer,
-                             FavAuthorsSerializer,
-                             TagSerializer, IngredientSerializer,
-                             ReceiptListSerializer, ReceiptPostPatchSerializer,
-                             ReceiptFavoriteSerializer, ReceiptCartSerializer)
-from api.permissions import IsAdminOrAuthorOrReadOnly
 from api.filters import IngredientFilter, ReceiptFilter
+from api.permissions import IsAdminOrAuthorOrReadOnly
+from api.serializers import (CustomUserSerializer, FavAuthorsSerializer,
+                             IngredientSerializer, ReceiptCartSerializer,
+                             ReceiptFavoriteSerializer, ReceiptListSerializer,
+                             ReceiptPostPatchSerializer,
+                             SubscriptionSerializer, TagSerializer)
+from receipts.models import Ingredient, IngredientInReceipt, Receipt, Tag
 from users.models import Subscription
-
 
 User = get_user_model()
 
