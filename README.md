@@ -83,4 +83,6 @@ _AlDrPy  https://github.com/AlDrPy_
 почта: random@random.com
 пароль: random123456
 
+```Адрес удаленного сервера```
 
+ip: 84.201.161.167

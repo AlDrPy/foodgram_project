@@ -1,8 +1,7 @@
 version: '3.3'
 
 volumes:
-  pg_data:
-  # sqlite_data:
+  pg_data_production:
   static:
   media:
 
@@ -10,11 +9,8 @@ services:
 
   frontend:
     env_file: .env
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: aldrpy/foodgram_frontend
     volumes:
-      # - ../frontend/:/app/result_build/
       - static:/static
     command: cp -r /app/build/. /static/
 
@@ -22,28 +18,27 @@ services:
     env_file: .env
     image: postgres:13
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - pg_data_production:/var/lib/postgresql/data
 
   backend:
     env_file: .env
     depends_on:
       - db
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
+    image: aldrpy/foodgram_backend
     volumes:
-      # - sqlite_data:/db_dev_data
       - media:/media
       - static:/backend_static
       - ../data/:/app/data/
 
   nginx:
     env_file: .env
-    build: ./
+    image: aldrpy/foodgram_gateway
     ports:
       - "8000:80"
     volumes:
-      # - ../frontend/build:/usr/share/nginx/html/
       - ../docs/:/usr/share/nginx/html/api/docs/
       - static:/static
       - media:/media
+    depends_on:
+      - backend
+      - frontend
