@@ -2,7 +2,6 @@ version: '3.3'
 
 volumes:
   pg_data:
-  # sqlite_data:
   static:
   media:
 
@@ -14,7 +13,6 @@ services:
       context: ../frontend
       dockerfile: Dockerfile
     volumes:
-      # - ../frontend/:/app/result_build/
       - static:/static
     command: cp -r /app/build/. /static/
 
@@ -32,7 +30,6 @@ services:
       context: ../backend
       dockerfile: Dockerfile
     volumes:
-      # - sqlite_data:/db_dev_data
       - media:/media
       - static:/backend_static
       - ../data/:/app/data/
@@ -43,7 +40,6 @@ services:
     ports:
       - "8000:80"
     volumes:
-      # - ../frontend/build:/usr/share/nginx/html/
       - ../docs/:/usr/share/nginx/html/api/docs/
       - static:/static
       - media:/media
