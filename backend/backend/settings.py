@@ -9,8 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', default='defaultstring')
 
-# DEBUG = os.getenv('DEBUG', default='false').lower() == 'true'
-DEBUG = True
+DEBUG = os.getenv('DEBUG', default='false').lower() == 'true'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='').split()
 
@@ -78,10 +77,6 @@ DATABASES = {
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
         'HOST': os.getenv('DB_HOST', ''),
         'PORT': os.getenv('DB_PORT', 5432)
-        # 'ENGINE': 'django.db.backends.sqlite3',
-        # 'NAME': '/db_dev_data/db.sqlite3',  # volume sqlite для контейнеров
-        # 'NAME': BASE_DIR / 'db.sqlite3',
-
 
     }
 }
