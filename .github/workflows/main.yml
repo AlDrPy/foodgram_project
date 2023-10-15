@@ -116,7 +116,7 @@ jobs:
         username: ${{ secrets.USER }}
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        source: "docker-compose.production.yml"
+        source: "infra/docker-compose.production.yml"
         target: "foodgram"
 
     - name: Copy ingredients.json via ssh
@@ -126,7 +126,7 @@ jobs:
         username: ${{ secrets.USER }}
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        source: "../data/ingredients.json"
+        source: "data/ingredients.json"
         target: "./"
 
     - name: Executing remote ssh commands to deploy
