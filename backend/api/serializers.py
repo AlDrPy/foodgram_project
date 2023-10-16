@@ -199,13 +199,21 @@ class ReceiptPostPatchSerializer(serializers.ModelSerializer):
         return data
 
     def add_ingredients(self, ingredients, receipt):
+        ingredient_in_receipt_objs_list = []
         for ingredient in ingredients:
             amount = ingredient.get('amount')
             current_ingredient = get_object_or_404(
                 Ingredient, id=ingredient.get('id'))
-            IngredientInReceipt.objects.create(
-                ingredient=current_ingredient, receipt=receipt,
-                amount=amount)
+            ingredient_in_receipt_objs_list.append(
+                IngredientInReceipt(
+                    receipt=receipt,
+                    ingredient=current_ingredient,
+                    amount=amount
+                )
+            )
+        IngredientInReceipt.objects.bulk_create(
+            ingredient_in_receipt_objs_list)
+
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')
