@@ -19,7 +19,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         request = self.context['request']
         return (request.user.is_authenticated
                 and request.user.fav_authors.filter(id=obj.id).exists())
-    
+
     def create(self, validated_data):
         password = validated_data.pop('password')
         user = User(
@@ -223,7 +223,6 @@ class ReceiptPostPatchSerializer(serializers.ModelSerializer):
             )
         IngredientInReceipt.objects.bulk_create(
             ingredient_in_receipt_objs_list)
-
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')
