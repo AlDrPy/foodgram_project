@@ -21,6 +21,16 @@ services:
     image: postgres:13
     volumes:
       - pg_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+        - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+        - PGADMIN_DEFAULT_PASSWORD=root
+    ports:
+        - "8080:80"
 
   backend:
     env_file: .env

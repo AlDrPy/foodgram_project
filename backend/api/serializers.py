@@ -19,12 +19,22 @@ class CustomUserSerializer(serializers.ModelSerializer):
         request = self.context['request']
         return (request.user.is_authenticated
                 and request.user.fav_authors.filter(id=obj.id).exists())
+    
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = User(
+            **validated_data
+        )
+        user.set_password(password)
+        user.save()
+        return user
 
     class Meta:
         model = User
         fields = (
             'email', 'id', 'username', 'first_name',
-            'last_name', 'is_subscribed')
+            'last_name', 'is_subscribed', 'password')
+        extra_kwargs = {'password': {'write_only': True}}
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
